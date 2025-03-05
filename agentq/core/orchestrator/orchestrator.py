@@ -41,7 +41,7 @@ init(autoreset=True)
 
 class Orchestrator:
     def __init__(
-        self, state_to_agent_map: Dict[State, BaseAgent], eval_mode: bool = False
+        self, state_to_agent_map: Dict[State, BaseAgent], eval_mode: bool = True
     ):
         load_dotenv()
         self.state_to_agent_map = state_to_agent_map
