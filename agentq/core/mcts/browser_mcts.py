@@ -40,7 +40,7 @@ from agentq.core.web_driver.playwright import PlaywrightManager
 # ANSI color codes
 BLUE = "\033[94m"
 GREEN = "\033[92m"
-YELLOW = "\033[93m"
+YELLOW = "\033[38;5;214m"
 RED = "\033[91m"
 MAGENTA = "\033[95m"
 CYAN = "\033[96m"
@@ -431,7 +431,7 @@ async def wait_for_navigation(max_retries=3):
     print(f"{RED}[DEBUG] Navigation failed after {max_retries} attempts{RESET}")
 
 
-async def main(objective: str = None, eval_mode: bool = False):
+async def main(objective: str = None, eval_mode: bool = False, n_iterations = 5, depth_limit = 3, exploration_weight = 1.0):
     print(f"{BLUE}Starting MCTS{RESET}")
     playwright_manager = PlaywrightManager()
 
@@ -457,9 +457,9 @@ async def main(objective: str = None, eval_mode: bool = False):
         actor=actor,
         critic=critic,
         vision=vision,
-        n_iterations=2,
-        depth_limit=2,
-        exploration_weight=1.0,
+        n_iterations=n_iterations,
+        depth_limit=depth_limit,
+        exploration_weight=exploration_weight,
     )
 
     print(f"{YELLOW}[DEBUG] Running MCTS wrapper{RESET}")
@@ -468,23 +468,8 @@ async def main(objective: str = None, eval_mode: bool = False):
     # Print results
     print(f"{CYAN}[DEBUG] Printing MCTS result{RESET}")
     BrowserMCTSWrapper.print_result(result)
-
-    urls = {}
-    AL = {}
-    Q = {}
-    def dfs(current_node):
-        try:
-            urls[current_node.id] = current_node.state.url  
-            Q[current_node.id] = current_node.Q
-            if(not current_node.is_terminal and current_node.children): 
-                for child in current_node.children:
-                    AL.append(child.id)
-                    dfs(child)
-        except Exception as e:
-            print(e)
-            pass
-    dfs(result.tree_state)
-    return {"urls": urls, "AL": AL, "Q": Q}
+    
+    return result
 
 
 # Temp class to write output to a file
