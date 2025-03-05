@@ -439,7 +439,7 @@ async def main(objective: str = None, eval_mode: bool = False, n_iterations = 5,
         await playwright_manager.async_initialize()
     else:
         await playwright_manager.async_initialize(
-            eval_mode=eval_mode, homepage="https://www.google.com/"
+            eval_mode=eval_mode, homepage="https://www.dominos.com/en/"
         )
         page: Page = await playwright_manager.get_current_page()
         await page.set_extra_http_headers({"User-Agent": "AgentQ-Bot"})
