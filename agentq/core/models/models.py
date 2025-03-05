@@ -235,6 +235,8 @@ class AgentQCriticOutput(BaseModel):
 # Vision
 class VisionInput(BaseModel):
     objective: str
+    current_page_url: str
+    current_page_dom: str
 
 
 class VisionOutput(BaseModel):

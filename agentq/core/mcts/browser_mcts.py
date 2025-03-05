@@ -13,7 +13,6 @@ from agentq.core.agent.base import BaseAgent
 from agentq.core.agent.vision_agent import VisionAgent
 from agentq.core.mcts.core.base import Reasoner, SearchConfig, WorldModel
 from agentq.core.mcts.core.mcts import MCTS, MCTSResult
-from agentq.core.mcts.visualization.visualizer_client import visualize
 from agentq.core.models.models import (
     ActionType,
     AgentQActorInput,
@@ -149,6 +148,8 @@ class BrowserWorldModel(WorldModel[BrowserState, BrowserAction, str]):
     async def get_current_dom(self) -> str:
         await wait_for_navigation()
         dom = await get_dom_with_content_type(content_type="all_fields")
+        if not dom:
+            return ""
         print(f"{CYAN}[DEBUG] Got current DOM (length: {len(dom)}){RESET}")
         return str(dom)
 
@@ -247,10 +248,14 @@ class BrowserMCTSSearchConfig(SearchConfig[BrowserState, BrowserAction, str]):
 
 async def is_terminal(state: BrowserState, vision: BaseAgent) -> bool:
     print(f"{YELLOW}[DEBUG] Checking if state is terminal{RESET}")
-    screenshot = await get_screenshot()
-    vision_input: VisionInput = VisionInput(objective=state.objective)
+    # screenshot = await get_screenshot()
+    vision_input: VisionInput = VisionInput(
+        objective=state.objective,
+        current_page_url=state.url,
+        current_page_dom=state.dom,
+    )
     vision_output: VisionOutput = await vision.run(
-        vision_input, screenshot, model="gpt-4o-2024-08-06"
+        vision_input, screenshot=None, model="gpt-4o-2024-08-06"
     )
     print(f"{YELLOW}[DEBUG] Output of vision LLM {vision_output.is_terminal}{RESET}")
     return vision_output.is_terminal
@@ -434,7 +439,7 @@ async def main(objective: str = None, eval_mode: bool = False):
         await playwright_manager.async_initialize()
     else:
         await playwright_manager.async_initialize(
-            eval_mode=eval_mode, homepage="http://localhost:3000/abc"
+            eval_mode=eval_mode, homepage="https://www.google.com/"
         )
         page: Page = await playwright_manager.get_current_page()
         await page.set_extra_http_headers({"User-Agent": "AgentQ-Bot"})
@@ -452,8 +457,8 @@ async def main(objective: str = None, eval_mode: bool = False):
         actor=actor,
         critic=critic,
         vision=vision,
-        n_iterations=10,
-        depth_limit=6,
+        n_iterations=2,
+        depth_limit=2,
         exploration_weight=1.0,
     )
 
@@ -464,16 +469,22 @@ async def main(objective: str = None, eval_mode: bool = False):
     print(f"{CYAN}[DEBUG] Printing MCTS result{RESET}")
     BrowserMCTSWrapper.print_result(result)
 
-    # Tree visualization
-    # visualize(result=result)
-
-    # Dpo pairs
-    dpo_pairs = BrowserMCTSWrapper.generate_dpo_pairs(result=result)
-    BrowserMCTSWrapper.print_dpo_pairs(dpo_pairs=dpo_pairs)
-    await BrowserMCTSWrapper.write_dpo_pairs_to_file(
-        dpo_pairs=dpo_pairs, filename="dpo_pairs.jsonl"
-    )
-    return dpo_pairs
+    urls = {}
+    AL = {}
+    Q = {}
+    def dfs(current_node):
+        try:
+            urls[current_node.id] = current_node.state.url  
+            Q[current_node.id] = current_node.Q
+            if(not current_node.is_terminal and current_node.children): 
+                for child in current_node.children:
+                    AL.append(child.id)
+                    dfs(child)
+        except Exception as e:
+            print(e)
+            pass
+    dfs(result.tree_state)
+    return {"urls": urls, "AL": AL, "Q": Q}
 
 
 # Temp class to write output to a file

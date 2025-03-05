@@ -37,7 +37,7 @@ class PlaywrightManager:
     def __init__(
         self,
         browser_type: str = "chromium",
-        headless: bool = False,
+        headless: bool = True,
         gui_input_mode: bool = True,
         screenshots_dir: str = "",
         take_screenshots: bool = False,
@@ -179,7 +179,7 @@ class PlaywrightManager:
                 )
                 PlaywrightManager._browser_context = await PlaywrightManager._playwright.chromium.launch_persistent_context(
                     new_user_dir,
-                    channel="chrome",
+                    channel="chromium",
                     headless=self.isheadless,
                     args=[
                         "--disable-blink-features=AutomationControlled",
@@ -215,7 +215,7 @@ class PlaywrightManager:
                 )
                 PlaywrightManager._browser_context = await PlaywrightManager._playwright.chromium.launch_persistent_context(
                     new_user_dir,
-                    channel="chrome",
+                    channel="chromium",
                     headless=self.isheadless,
                     args=[
                         "--disable-blink-features=AutomationControlled",

@@ -139,10 +139,10 @@ async def main():
         [0, 1, 0, 1, 0],
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
-        [0, 0, 3, 1, 2],
+        [3, 0, 0, 1, 2],
     ]
 
-    mcts_wrapper = MCTSGridWrapper(grid, n_iterations=10000, exploration_weight=1.0)
+    mcts_wrapper = MCTSGridWrapper(grid, n_iterations=1000, exploration_weight=1.0)
     result = await mcts_wrapper()
 
     MCTSGridWrapper.print_path(result)

@@ -1,7 +1,7 @@
 def main():
     import argparse
 
-    from agentq.core.mcts.visualization import VisualizerClient
+    from agentq.core.mcts.visualization.visualizer_client import VisualizerClient
 
     parser = argparse.ArgumentParser()
     parser.add_argument("tree_log", type=str)
@@ -17,3 +17,7 @@ def main():
         data = f.read()
     result = client.post_log(data)
     print(result.access_url)
+
+
+if __name__ == "__main__":
+    main()

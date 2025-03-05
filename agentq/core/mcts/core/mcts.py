@@ -230,7 +230,7 @@ class MCTS(SearchAlgorithm, Generic[State, Action, Example]):
             await self._expand(path[-1])
             await self._simulate(path)
         cum_reward = self._back_propagate(path)
-        #self._print_tree(self.root)
+        # self._print_tree(self.root)
         if (
             self.output_strategy == "max_iter"
             and path[-1].is_terminal
@@ -360,7 +360,7 @@ class MCTS(SearchAlgorithm, Generic[State, Action, Example]):
     def _back_propagate(self, path: list[MCTSNode]):
         reward = path[-1].reward
         for node in reversed(path):
-            print(node.state.url)
+            # print(node.state.url)
             print(node.Q)
             print(node.N)
             node.Q = (node.Q * node.N + reward) / (node.N + 1)
@@ -401,11 +401,11 @@ class MCTS(SearchAlgorithm, Generic[State, Action, Example]):
         ):
             print(f"-----iter: {iter}----")
             # start with home page for each iteration
-            playwright_manager = PlaywrightManager()
-            await playwright_manager.go_to_homepage()
+            # playwright_manager = PlaywrightManager()
+            # await playwright_manager.go_to_homepage()
             path = await self.iterate(self.root)
-            if self.output_trace_in_each_iter:
-                self.trace_in_each_iter.append(deepcopy(path))
+            # if self.output_trace_in_each_iter:
+            #     self.trace_in_each_iter.append(deepcopy(path))
 
         if self.output_strategy == "follow_max":
             self._output_iter = []
